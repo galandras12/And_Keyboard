@@ -3,7 +3,24 @@ package helium314.keyboard.settings.screens
 
 import android.content.Context
 import androidx.compose.material3.Surface
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.unit.dp
+import helium314.keyboard.latin.common.LocaleUtils.localizedDisplayName
+import helium314.keyboard.latin.utils.DictionaryAutoDownloader
+import helium314.keyboard.latin.utils.getEnabledLocalesWithoutDictionary
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -55,7 +72,8 @@ fun GestureTypingScreen(
     SearchSettingsScreen(
         onClickBack = onClickBack,
         title = stringResource(R.string.settings_screen_gesture),
-        settings = items
+        settings = items,
+        header = { GestureStatusCard() }
     )
 }
 
@@ -111,6 +129,35 @@ fun createGestureTypingSettings(context: Context) = listOf(
         ) { KeyboardSwitcher.getInstance().setThemeNeedsReload() }
     },
 )
+
+/** Tells whether glide typing can work: which decoder is used and whether the languages have the dictionary it needs. */
+@Composable
+private fun GestureStatusCard() {
+    val ctx = LocalContext.current
+    val resources = LocalResources.current
+    val missing = remember { getEnabledLocalesWithoutDictionary(ctx) }
+    val ok = missing.isEmpty()
+    Card(
+        colors = CardDefaults.cardColors(containerColor = if (ok) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.errorContainer),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
+    ) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(stringResource(R.string.gesture_status_title), style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(if (JniUtils.sHaveGestureLib) R.string.gesture_status_library else R.string.gesture_status_builtin), style = MaterialTheme.typography.bodyMedium)
+            if (ok) {
+                Text(stringResource(R.string.gesture_status_dictionary_ok), style = MaterialTheme.typography.bodyMedium)
+            } else {
+                Text(
+                    stringResource(R.string.gesture_status_dictionary_missing, missing.joinToString(", ") { it.localizedDisplayName(resources) }),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Button(onClick = { DictionaryAutoDownloader.requestCheck(ctx, showMessage = true, force = true) }, modifier = Modifier.align(Alignment.End)) {
+                    Text(stringResource(R.string.dictionary_banner_button))
+                }
+            }
+        }
+    }
+}
 
 @Preview
 @Composable

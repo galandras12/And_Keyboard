@@ -528,6 +528,40 @@ f""", // no newline at the end
         }
     }
 
+    /** The same chain the keyboard uses for a gesture: Suggest -> DictionaryFacilitatorImpl -> open decoder, with a main dictionary like the app has it. */
+    @Test fun `suggest pipeline returns the word of a gesture without the closed library`() {
+        helium314.keyboard.latin.utils.JniUtils.sHaveGestureLib = false
+        val locale = Locale.forLanguageTag("hu")
+        val words = listOf("szeretlek" to 150, "köszönöm" to 200, "hétvége" to 120, "ember" to 180, "embert" to 100)
+        val main = helium314.keyboard.latin.dictionary.DictionaryCollection(helium314.keyboard.latin.dictionary.Dictionary.TYPE_MAIN, locale,
+            listOf(WordListDictionary(helium314.keyboard.latin.dictionary.Dictionary.TYPE_MAIN, locale, words)), floatArrayOf(1f))
+        val groupClass = Class.forName("helium314.keyboard.latin.DictionaryGroup")
+        val group = groupClass.getDeclaredConstructor(Locale::class.java, helium314.keyboard.latin.dictionary.Dictionary::class.java,
+            Map::class.java, android.content.Context::class.java).apply { isAccessible = true }.newInstance(locale, main, emptyMap<String, Any>(), null)
+        val facilitator = helium314.keyboard.latin.DictionaryFacilitatorImpl()
+        helium314.keyboard.latin.DictionaryFacilitatorImpl::class.java.getDeclaredField("dictionaryGroups").apply { isAccessible = true }.set(facilitator, listOf(group))
+        val suggest = helium314.keyboard.latin.Suggest(facilitator)
+
+        val subtype = SubtypeUtilsAdditional.createEmojiCapableAdditionalSubtype(locale, "hungarian_qwertz", true)
+        val (keyboard, _) = buildKeyboard(EditorInfo(), subtype, KeyboardElement.ALPHABET)
+        val layout = OpenGestureSuggester.layoutOf(keyboard)
+        for ((word, _) in words) {
+            val keys = word.mapNotNull { layout.keyFor(it) }.fold(ArrayList<helium314.keyboard.latin.gesture.GestureKey>()) { list, key ->
+                if (list.lastOrNull() !== key) list.add(key); list
+            }
+            val pointers = helium314.keyboard.latin.common.InputPointers(keys.size)
+            keys.forEachIndexed { i, key -> pointers.addPointer(key.cx.toInt(), key.cy.toInt(), 0, i * 50) }
+            val composer = helium314.keyboard.latin.WordComposer()
+            composer.setBatchInputPointers(pointers)
+            val suggested = suggest.getSuggestedWords(composer, helium314.keyboard.latin.NgramContext.EMPTY_PREV_WORDS_INFO, keyboard,
+                helium314.keyboard.latin.settings.Settings.getValues().mSettingsValuesForSuggestion, true,
+                helium314.keyboard.latin.SuggestedWords.INPUT_STYLE_TAIL_BATCH, 1)
+            println("$word -> " + (0 until suggested.size()).joinToString { suggested.getWord(it) })
+            assertTrue(!suggested.isEmpty(), "no suggestions for $word")
+            assertEquals(word, suggested.getWord(0).lowercase(), "first suggestion for $word")
+        }
+    }
+
     @Test fun `popup key count does not depend on shift for (for simple layout)`() {
         val editorInfo = EditorInfo()
         val subtype = SubtypeUtilsAdditional.createEmojiCapableAdditionalSubtype(Locale.ENGLISH, "qwerty", true)
@@ -659,4 +693,16 @@ f""", // no newline at the end
 class ShadowProximityInfo {
     @Implementation
     fun createNativeProximityInfo(tpc: TouchPositionCorrection): Long = 0
+}
+
+/** A dictionary that only has a word list, like the main dictionaries that are read through forEachWord. */
+class WordListDictionary(type: String, locale: Locale, private val words: List<Pair<String, Int>>) : helium314.keyboard.latin.dictionary.Dictionary(type, locale) {
+    override fun getSuggestions(composedData: helium314.keyboard.latin.common.ComposedData, ngramContext: helium314.keyboard.latin.NgramContext,
+        proximityInfoHandle: Long, settingsValuesForSuggestion: helium314.keyboard.latin.settings.SettingsValuesForSuggestion, sessionId: Int,
+        weightForLocale: Float, inOutWeightOfLangModelVsSpatialModel: FloatArray?): java.util.ArrayList<helium314.keyboard.latin.SuggestedWords.SuggestedWordInfo>? = null
+    override fun isInDictionary(word: String) = words.any { it.first == word }
+    override fun forEachWord(consumer: helium314.keyboard.latin.dictionary.Dictionary.WordConsumer): Boolean {
+        words.forEach { consumer.accept(it.first, it.second, false) }
+        return true
+    }
 }

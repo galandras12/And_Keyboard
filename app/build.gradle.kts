@@ -95,6 +95,7 @@ android {
     testOptions {
         unitTests {
             isIncludeAndroidResources = true
+            isReturnDefaultValues = true // lets plain (non-Robolectric) tests touch classes that log, like the native dictionary tests
         }
     }
 

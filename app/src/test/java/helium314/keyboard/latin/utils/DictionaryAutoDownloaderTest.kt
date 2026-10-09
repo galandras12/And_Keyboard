@@ -26,6 +26,10 @@ class DictionaryAutoDownloaderTest {
         assertEquals(other, choose("hu", experimental, other))
     }
 
+    @Test fun `experimental dictionaries are not downloaded automatically`() {
+        assertNull(choose("hu", dict("main", "hu", AvailableDictionary.Source.AOSP_DICTIONARIES_EXPERIMENTAL)))
+    }
+
     @Test fun `exact locale beats the same language`() {
         val gb = dict("main", "en_GB")
         val us = dict("main", "en_US")

@@ -59,6 +59,7 @@ fun SearchSettingsScreen(
     onClickBack: () -> Unit,
     title: String,
     settings: List<Any?>,
+    header: @Composable (() -> Unit)? = null, // shown above the settings
     content: @Composable (ColumnScope.() -> Unit)? = null // overrides settings if not null
 ) {
     SearchScreen(
@@ -73,6 +74,7 @@ fun SearchSettingsScreen(
                     Column(
                         Modifier.verticalScroll(rememberScrollState()).then(Modifier.padding(innerPadding))
                     ) {
+                        header?.invoke()
                         settings.forEach {
                             if (it is Int) {
                                 PreferenceCategory(stringResource(it))

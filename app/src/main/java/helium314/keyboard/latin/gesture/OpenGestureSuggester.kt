@@ -18,7 +18,9 @@ object OpenGestureSuggester {
 
     private val decoder = Shark2Decoder()
     private val lexicons = WeakHashMap<Dictionary, Array<GestureLexicon?>>() // index 0: all words, 1: without offensive words
-    private var cachedLayout: Pair<WeakReference<Keyboard>, GestureKeyLayout>? = null
+    @Volatile private var cachedLayout: Pair<WeakReference<Keyboard>, GestureKeyLayout>? = null
+    /** The biggest dictionaries have millions of words; the rarest ones are left out to keep memory use and decoding time in check. */
+    private const val MAX_LEXICON_WORDS = 600_000
 
     /** Suggestions for the gesture in [composedData], best first; null if the dictionary can't be used for it. */
     fun suggest(
@@ -48,6 +50,10 @@ object OpenGestureSuggester {
             if (!(blockOffensive && offensive)) entries.add(word to probability.coerceIn(0, 255))
         }
         if (!readable) return null
+        if (entries.size > MAX_LEXICON_WORDS) {
+            entries.sortByDescending { it.second }
+            entries.subList(MAX_LEXICON_WORDS, entries.size).clear()
+        }
         return GestureLexicon(entries).also { cached[index] = it }
     }
 

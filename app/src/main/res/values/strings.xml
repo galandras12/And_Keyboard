@@ -703,6 +703,11 @@ New dictionary:
     <string name="auto_download_dictionaries">Download dictionaries automatically</string>
     <string name="auto_download_dictionaries_summary">Downloads the main dictionary of each enabled language that has none. Only a plain file download, nothing about you is sent.</string>
     <string name="dictionary_auto_downloaded">Dictionary downloaded: %s</string>
+    <string name="gesture_status_title">Glide typing status</string>
+    <string name="gesture_status_builtin">Decoder: built-in open source decoder (no external library needed).</string>
+    <string name="gesture_status_library">Decoder: external glide typing library.</string>
+    <string name="gesture_status_dictionary_ok">The main dictionary of every enabled language is installed.</string>
+    <string name="gesture_status_dictionary_missing">Glide typing needs a main dictionary, which is missing for: %s</string>
     <string name="dictionary_name_label">Name</string>
     <string name="dictionary_name_hint">Name shown in the dictionary list</string>
     <string name="no_dictionary_download_message">Without a dictionary, you will only get suggestions for text you entered before. You can download one now, or add your own file in the dictionary settings.</string>
@@ -829,11 +834,14 @@ New dictionary:
     <!-- version for about screen -->
     <string name="version">Version</string>
     <!-- github repo link for about screen -->
-    <string name="about_github_link">View on GitHub</string>
+    <string name="about_github_link">And Keyboard on GitHub</string>
+    <string name="about_github_link_description">github.com/galandras12/And_Keyboard</string>
+    <string name="about_source_app">Original source: HeliBoard</string>
+    <string name="about_source_app_description">And Keyboard is a fork of HeliBoard by Helium314 and contributors (GPL-3.0), which is based on OpenBoard and AOSP. github.com/HeliBorg/HeliBoard</string>
     <!-- link to the wiki for about screen -->
     <string name="about_wiki_link">Go to Wiki</string>
     <!-- description for wiki link -->
-    <string name="about_wiki_link_description">The Wiki can be improved by any GitHub user!</string>
+    <string name="about_wiki_link_description">The HeliBoard Wiki, which also describes the features that And Keyboard inherited</string>
     <!-- links to community stuff -->
     <string name="about_community_links">Community links</string>
     <!-- description for about_community_links -->

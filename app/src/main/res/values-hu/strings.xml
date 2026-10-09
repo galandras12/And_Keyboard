@@ -106,6 +106,11 @@
     <string name="auto_download_dictionaries">Szótárak automatikus letöltése</string>
     <string name="auto_download_dictionaries_summary">Letölti minden engedélyezett nyelv főszótárát, amelyiknek még nincs. Csak egyszerű fájlletöltés, semmi nem megy el Önről.</string>
     <string name="dictionary_auto_downloaded">Szótár letöltve: %s</string>
+    <string name="gesture_status_title">Kézmozdulat-gépelés állapota</string>
+    <string name="gesture_status_builtin">Dekóder: beépített, nyílt forráskódú dekóder (nem kell külső könyvtár).</string>
+    <string name="gesture_status_library">Dekóder: külső gesztusgépelő könyvtár.</string>
+    <string name="gesture_status_dictionary_ok">Minden engedélyezett nyelv főszótára telepítve van.</string>
+    <string name="gesture_status_dictionary_missing">A kézmozdulat-gépeléshez főszótár kell, ami hiányzik ezeknél: %s</string>
     <string name="dictionary_name_label">Név</string>
     <string name="dictionary_name_hint">A szótárlistában megjelenő név</string>
     <string name="no_dictionary_download_message">Szótár nélkül csak a korábban beírt szövegekre kap javaslatokat. Most letölthet egyet, vagy a szótárbeállításokban saját fájlt adhat hozzá.</string>
@@ -306,7 +311,10 @@
     <string name="select_color_accent">Kiemelőszín</string>
     <string name="select_color_gesture">Kézmozdulat-gépelés</string>
     <string name="version">Verzió</string>
-    <string name="about_github_link">Megtekintés a GitHubon</string>
+    <string name="about_github_link">And Keyboard a GitHubon</string>
+    <string name="about_github_link_description">github.com/galandras12/And_Keyboard</string>
+    <string name="about_source_app">Eredeti forrás: HeliBoard</string>
+    <string name="about_source_app_description">Az And Keyboard a HeliBoard (Helium314 és közreműködők, GPL-3.0) forkja, ami az OpenBoardra és az AOSP-re épül. github.com/HeliBorg/HeliBoard</string>
     <string name="save_log">Napló mentése</string>
     <string name="license">Nyílt forráskódú licenc</string>
     <string name="gnu_gpl">GNU General Public License v3.0</string>
@@ -424,7 +432,7 @@
     <string name="get_colors_message">A színeket a következő helyen találja és oszthatja meg: %s.</string>
     <string name="get_layouts_message">Az elrendezéseket a következő helyen találja és oszthatja meg: %s.</string>
     <string name="about_wiki_link">Ugrás a Wikire</string>
-    <string name="about_wiki_link_description">A Wikit bármely GitHub-felhasználó javíthatja!</string>
+    <string name="about_wiki_link_description">A HeliBoard wikije, ami az And Keyboard örökölt funkcióit is leírja</string>
     <string name="settings_screen_toolbar">Eszköztár</string>
     <string name="label_enter_key" tools:keep="@string/label_enter_key">Enter</string>
     <string name="label_delete_key" tools:keep="@string/label_delete_key">Törlés</string>

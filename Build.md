@@ -1,6 +1,6 @@
 # Build.md
 
-This project is a fork of [HeliBoard](https://github.com/Helium314/HeliBoard)
+This project (And Keyboard 0.1, package `com.galandras12.keyboard`) is a fork of [HeliBoard](https://github.com/Helium314/HeliBoard)
 (upstream commit `bc2b911`, version `4.2-beta1`), licensed under GPL-3.0
 (see `LICENSE`).
 
@@ -30,8 +30,8 @@ sdkmanager "platform-tools" "platforms;android-37.0" "build-tools;37.0.0" "ndk;2
 ./gradlew assembleDebug
 ```
 
-Output: `app/build/outputs/apk/debug/HeliBoard_4.2-beta1-debug.apk`
-(application id `helium314.keyboard.debug`, so it installs next to a release build).
+Output: `app/build/outputs/apk/debug/AndKeyboard_0.1-debug.apk`
+(application id `com.galandras12.keyboard.debug`, so it installs next to a release build; the Kotlin/Java source packages are still `helium314.keyboard.*`).
 The first build takes ~6 minutes (dependencies + NDK compilation for 4 ABIs).
 
 Notes:
@@ -46,10 +46,10 @@ Physical phone (USB debugging enabled) or an emulator with a running `adb` devic
 
 ```sh
 adb devices
-adb install -r app/build/outputs/apk/debug/HeliBoard_4.2-beta1-debug.apk
+adb install -r app/build/outputs/apk/debug/AndKeyboard_0.1-debug.apk
 # enable and select the keyboard
-adb shell ime enable helium314.keyboard.debug/helium314.keyboard.latin.LatinIME
-adb shell ime set    helium314.keyboard.debug/helium314.keyboard.latin.LatinIME
+adb shell ime enable com.galandras12.keyboard.debug/helium314.keyboard.latin.LatinIME
+adb shell ime set    com.galandras12.keyboard.debug/helium314.keyboard.latin.LatinIME
 ```
 
 Or enable it manually: Settings → System → Languages & input → On-screen keyboard →

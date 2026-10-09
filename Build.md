@@ -1,6 +1,6 @@
 # Build.md
 
-This project (And Keyboard 0.1, package `com.galandras12.keyboard`) is a fork of [HeliBoard](https://github.com/Helium314/HeliBoard)
+This project (And Keyboard 0.2, package `com.galandras12.keyboard`) is a fork of [HeliBoard](https://github.com/Helium314/HeliBoard)
 (upstream commit `bc2b911`, version `4.2-beta1`), licensed under GPL-3.0
 (see `LICENSE`).
 
@@ -30,7 +30,7 @@ sdkmanager "platform-tools" "platforms;android-37.0" "build-tools;37.0.0" "ndk;2
 ./gradlew assembleDebug
 ```
 
-Output: `app/build/outputs/apk/debug/AndKeyboard_0.1-debug.apk`
+Output: `app/build/outputs/apk/debug/AndKeyboard_0.2-debug.apk`
 (application id `com.galandras12.keyboard.debug`, so it installs next to a release build; the Kotlin/Java source packages are still `helium314.keyboard.*`).
 The first build takes ~6 minutes (dependencies + NDK compilation for 4 ABIs).
 
@@ -46,7 +46,7 @@ Physical phone (USB debugging enabled) or an emulator with a running `adb` devic
 
 ```sh
 adb devices
-adb install -r app/build/outputs/apk/debug/AndKeyboard_0.1-debug.apk
+adb install -r app/build/outputs/apk/debug/AndKeyboard_0.2-debug.apk
 # enable and select the keyboard
 adb shell ime enable com.galandras12.keyboard.debug/helium314.keyboard.latin.LatinIME
 adb shell ime set    com.galandras12.keyboard.debug/helium314.keyboard.latin.LatinIME
@@ -99,7 +99,8 @@ The built APK declares: `INTERNET`, `READ_USER_DICTIONARY`, `WRITE_USER_DICTIONA
 **no keystroke logging**, and **`INTERNET` is only for downloading dictionary files**.
 
 - `INTERNET` is used by exactly one class, `latin/utils/DictionaryDownloader.kt`: a plain https GET of a dictionary
-  file that the user picked in Settings → Dictionaries (or from the "dictionary missing" notice). Nothing is
+  file, either one the user picked in Settings → Dictionaries, or the main dictionary of an enabled language that has none
+  (`DictionaryAutoDownloader`, on by default, switch in Settings → Dictionaries; retried at most every 6 hours). Nothing is
   sent about the user, the device or the typed text; cleartext http is disabled in the manifest and refused by the
   downloader (also for redirects), the size is limited to 80 MB, and files hosted by this project are checked
   against a SHA-256 (see `DictionaryCatalog.kt`).

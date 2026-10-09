@@ -41,6 +41,7 @@ internal class EmojiCategory(private val context: Context, private val layoutSet
 
     val shownCategories = listOfNotNull(
         CategoryProperties(Category.RECENTS),
+        CategoryProperties(Category.FREQUENT),
         CategoryProperties(Category.SMILEYS),
         CategoryProperties(Category.PEOPLE),
         CategoryProperties(Category.NATURE),
@@ -90,7 +91,7 @@ internal class EmojiCategory(private val context: Context, private val layoutSet
 
     fun getCategoryTabIcon(category: Category) = categoryTabIconId[category.ordinal]
 
-    fun getAccessibilityDescription(category: Category) = context.getString(category.element.descriptionResId)
+    fun getAccessibilityDescription(category: Category) = context.getString(category.descriptionResId)
 
     val currentCategoryPageCount get() = getCategoryPageCount(currentCategory)
 
@@ -126,12 +127,22 @@ internal class EmojiCategory(private val context: Context, private val layoutSet
 
     fun reloadRecents() = categoryKeyboardMap[getCategoryKeyboardMapKey(Category.RECENTS, 0)]?.loadRecentKeys(categoryKeyboardMap.values)
 
+    fun reloadFrequent() = categoryKeyboardMap[getCategoryKeyboardMapKey(Category.FREQUENT, 0)]?.loadFrequentKeys(categoryKeyboardMap.values)
+
     fun getKeyboard(category: Category, id: Int): DynamicGridKeyboard {
         synchronized(categoryKeyboardMap) {
             val categoryKeyboardMapKey = getCategoryKeyboardMapKey(category, id)
             categoryKeyboardMap[categoryKeyboardMapKey]?.let { return it }
 
             val currentWidth = ResourceUtils.getKeyboardWidth(context, Settings.getValues())
+            if (category == Category.FREQUENT) {
+                val kbd = DynamicGridKeyboard.ofFrequentKeyCount(
+                    prefs, layoutSet.getKeyboard(KeyboardElement.EMOJI_RECENTS), maxRecentsKeyCount, currentWidth
+                )
+                categoryKeyboardMap[categoryKeyboardMapKey] = kbd
+                kbd.loadFrequentKeys(categoryKeyboardMap.values)
+                return kbd
+            }
             if (category == Category.RECENTS) {
                 val kbd = DynamicGridKeyboard.ofKeyCount(
                     prefs,
@@ -170,8 +181,11 @@ internal class EmojiCategory(private val context: Context, private val layoutSet
         return MAX_LINE_COUNT_PER_PAGE * tempKeyboard.occupiedColumnCount
     }
 
-    enum class Category(val element: KeyboardElement, val iconAttr: Int) {
+    enum class Category(val element: KeyboardElement, val iconAttr: Int, val descriptionResId: Int = element.descriptionResId) {
         RECENTS(KeyboardElement.EMOJI_RECENTS, R.styleable.EmojiPalettesView_iconEmojiRecentsTab),
+        // uses the (empty) recents layout as template, the keys are loaded from the usage counts
+        FREQUENT(KeyboardElement.EMOJI_RECENTS, R.styleable.EmojiPalettesView_iconEmojiFrequentTab,
+            R.string.spoken_description_emoji_category_frequent),
         SMILEYS(KeyboardElement.EMOJI_SMILEYS, R.styleable.EmojiPalettesView_iconEmojiSmileysTab),
         PEOPLE(KeyboardElement.EMOJI_PEOPLE, R.styleable.EmojiPalettesView_iconEmojiPeopleTab),
         NATURE(KeyboardElement.EMOJI_NATURE, R.styleable.EmojiPalettesView_iconEmojiNatureTab),

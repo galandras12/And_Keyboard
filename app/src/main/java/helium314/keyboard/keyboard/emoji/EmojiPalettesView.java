@@ -368,6 +368,7 @@ public final class EmojiPalettesView extends LinearLayout
         params.updateParams(mEmojiLayoutParams.getBottomRowKeyboardHeight(), keyVisualAttr);
         new EmojiLayoutParams(getResources()).setEmojiListProperties(mPager); // necessary when floating
         mEmojiCategory.reloadRecents(); // in case recents changed from outside emoji keyboards
+        mEmojiCategory.reloadFrequent();
         setupSidePadding();
         initDictionaryFacilitator();
     }
@@ -383,6 +384,10 @@ public final class EmojiPalettesView extends LinearLayout
         }
         getRecentsKeyboard().addKeyFirst(key);
         mPager.getAdapter().notifyItemChanged(mEmojiCategory.getRecentTabId());
+        if (mEmojiCategory.getCurrentCategory() != EmojiCategory.Category.FREQUENT) { // don't move emojis around while the user is looking at them
+            mEmojiCategory.reloadFrequent();
+            mPager.getAdapter().notifyItemChanged(mEmojiCategory.getTabIdFromCategoryId(EmojiCategory.Category.FREQUENT));
+        }
     }
 
     private void setupBottomRowKeyboard(EditorInfo editorInfo, KeyboardActionListener keyboardActionListener) {

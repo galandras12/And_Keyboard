@@ -62,6 +62,7 @@
         >
         <item name="categoryPageIndicatorBackground">@color/emoji_tab_page_indicator_background_lxx_base</item>
         <item name="iconEmojiRecentsTab">@drawable/ic_emoji_recents_rounded</item>
+        <item name="iconEmojiFrequentTab">@drawable/ic_emoji_frequent</item>
         <item name="iconEmojiSmileysTab">@drawable/ic_emoji_smileys_emotion_rounded</item>
         <item name="iconEmojiPeopleTab">@drawable/ic_emoji_people_body_rounded</item>
         <item name="iconEmojiNatureTab">@drawable/ic_emoji_animals_nature_lxx</item>

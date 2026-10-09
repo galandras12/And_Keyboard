@@ -19,6 +19,7 @@ object RecentEmojis {
     @JvmStatic
     fun add(emoji: String) {
         if (emoji.isEmpty()) return
+        FrequentEmojis.add(emoji)
         val recents = get()
         recents.removeAll { it == emoji }
         recents.add(0, emoji)

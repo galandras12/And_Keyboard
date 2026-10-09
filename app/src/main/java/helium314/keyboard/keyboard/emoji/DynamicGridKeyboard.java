@@ -45,6 +45,7 @@ final class DynamicGridKeyboard extends Keyboard {
     private final int mMaxKeyCount;
     private final boolean mFixedRowCount;
     private final boolean mIsRecents;
+    private final boolean mIsFrequent; // looks like the recents, but is filled from the usage counts and can't be edited
     private final ArrayDeque<GridKey> mGridKeys = new ArrayDeque<>();
     private final ArrayDeque<Key> mPendingKeys = new ArrayDeque<>();
 
@@ -53,16 +54,21 @@ final class DynamicGridKeyboard extends Keyboard {
 
     public static DynamicGridKeyboard ofKeyCount(SharedPreferences prefs, Keyboard templateKeyboard,
             int maxKeyCount, boolean isRecents, int width) {
-        return new DynamicGridKeyboard(prefs, templateKeyboard, maxKeyCount, isRecents, width, false);
+        return new DynamicGridKeyboard(prefs, templateKeyboard, maxKeyCount, isRecents, width, false, false);
+    }
+
+    public static DynamicGridKeyboard ofFrequentKeyCount(SharedPreferences prefs, Keyboard templateKeyboard,
+            int maxKeyCount, int width) {
+        return new DynamicGridKeyboard(prefs, templateKeyboard, maxKeyCount, true, width, false, true);
     }
 
     public static DynamicGridKeyboard ofRowCount(SharedPreferences prefs, Keyboard templateKeyboard,
             int maxRowCount, boolean isRecents, int width) {
-        return new DynamicGridKeyboard(prefs, templateKeyboard, maxRowCount, isRecents, width, true);
+        return new DynamicGridKeyboard(prefs, templateKeyboard, maxRowCount, isRecents, width, true, false);
     }
 
     private DynamicGridKeyboard(SharedPreferences prefs, Keyboard templateKeyboard,
-            int maxCount, boolean isRecents, int width, boolean fixedRowCount) {
+            int maxCount, boolean isRecents, int width, boolean fixedRowCount, boolean isFrequent) {
         super(templateKeyboard);
         // todo: would be better to keep them final and not require width, but how to properly set width of the template keyboard?
         //  an alternative would be to always create the templateKeyboard with full width
@@ -83,6 +89,7 @@ final class DynamicGridKeyboard extends Keyboard {
         mMaxKeyCount = fixedRowCount? maxCount * getOccupiedColumnCount() : maxCount;
         mFixedRowCount = fixedRowCount;
         mIsRecents = isRecents;
+        mIsFrequent = isFrequent;
     }
 
     private void setSpacerColumns(final float spacerWidth) {
@@ -140,7 +147,7 @@ final class DynamicGridKeyboard extends Keyboard {
     }
 
     public boolean isRecents() {
-        return mIsRecents;
+        return mIsRecents && !mIsFrequent;
     }
 
     public void removeRecentsKey(Key key) {
@@ -197,7 +204,7 @@ final class DynamicGridKeyboard extends Keyboard {
             // Check if hint was a more emoji indicator and prevent its copy if popup keys aren't copied
             boolean dropHintLabel = mIsRecents && EMOJI_HINT_LABEL.equals(usedKey.getHintLabel());
             GridKey key = new GridKey(usedKey,
-                    mIsRecents ? REMOVE_RECENT_POPUP_KEYS : usedKey.getPopupKeys(),
+                    mIsRecents ? (mIsFrequent ? null : REMOVE_RECENT_POPUP_KEYS) : usedKey.getPopupKeys(),
                     dropHintLabel ? null : usedKey.getHintLabel(),
                     mIsRecents ? Key.BACKGROUND_TYPE_EMPTY : usedKey.getBackgroundType());
             while (mGridKeys.remove(key)) {
@@ -266,7 +273,16 @@ final class DynamicGridKeyboard extends Keyboard {
     }
 
     public void loadRecentKeys(Collection<DynamicGridKeyboard> keyboards) {
-        List<String> emojis = RecentEmojis.get();
+        loadKeys(keyboards, RecentEmojis.get());
+    }
+
+    /** Replaces the keys by the most frequently used emojis. */
+    public void loadFrequentKeys(Collection<DynamicGridKeyboard> keyboards) {
+        removeAllKeys();
+        loadKeys(keyboards, FrequentEmojis.get());
+    }
+
+    private void loadKeys(Collection<DynamicGridKeyboard> keyboards, List<String> emojis) {
         for (String emoji : emojis) {
             Key key;
             if (StringUtils.codePointCount(emoji) == 1) {

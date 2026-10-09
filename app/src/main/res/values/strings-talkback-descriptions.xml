@@ -114,6 +114,7 @@
 
     <!-- Description of the emoji category icon of Recents. -->
     <string name="spoken_description_emoji_category_recents">Recents</string>
+    <string name="spoken_description_emoji_category_frequent">Frequently used</string>
     <!-- Description of the emoji category icon of Objects. -->
     <string name="spoken_description_emoji_category_objects">Objects</string>
     <!-- Description of the emoji category icon of Symbols. -->

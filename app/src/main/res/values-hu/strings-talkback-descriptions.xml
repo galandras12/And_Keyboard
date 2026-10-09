@@ -50,6 +50,7 @@
     <string name="keyboard_mode_time">"idő"</string>
     <string name="keyboard_mode_url">"URL"</string>
     <string name="spoken_description_emoji_category_recents">"Legutóbbiak"</string>
+    <string name="spoken_description_emoji_category_frequent">"Gyakran használt"</string>
     <string name="spoken_description_emoji_category_objects">"Objektumok"</string>
     <string name="spoken_description_emoji_category_symbols">"Szimbólumok"</string>
     <string name="spoken_description_emoji_category_flags">"Zászlók"</string>

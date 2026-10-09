@@ -23,6 +23,8 @@ import helium314.keyboard.latin.common.splitOnWhitespace
 import helium314.keyboard.latin.dictionary.AppsBinaryDictionary
 import helium314.keyboard.latin.dictionary.ContactsBinaryDictionary
 import helium314.keyboard.latin.dictionary.Dictionary
+import helium314.keyboard.latin.gesture.OpenGestureSuggester
+import helium314.keyboard.latin.utils.JniUtils
 import helium314.keyboard.latin.dictionary.DictionaryFactory
 import helium314.keyboard.latin.dictionary.DictionaryStats
 import helium314.keyboard.latin.dictionary.ExpandableBinaryDictionary
@@ -493,12 +495,12 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
         val suggestionsArray = Array<List<SuggestedWordInfo>?>(dictionaryGroups.size) { null }
         for (i in 1..dictionaryGroups.lastIndex) {
             scope.launch {
-                suggestionsArray[i] = getSuggestions(composedData, ngramContext, settingsValuesForSuggestion, sessionId,
+                suggestionsArray[i] = getSuggestions(composedData, ngramContext, keyboard, settingsValuesForSuggestion, sessionId,
                     proximityInfoHandle, weightOfLangModelVsSpatialModel, dictionaryGroups[i])
                 waitForOtherDicts?.countDown()
             }
         }
-        suggestionsArray[0] = getSuggestions(composedData, ngramContext, settingsValuesForSuggestion, sessionId,
+        suggestionsArray[0] = getSuggestions(composedData, ngramContext, keyboard, settingsValuesForSuggestion, sessionId,
             proximityInfoHandle, weightOfLangModelVsSpatialModel, dictionaryGroups[0])
         val suggestionResults = SuggestionResults(
             SuggestedWords.MAX_SUGGESTIONS, ngramContext.isBeginningOfSentenceContext, false
@@ -517,7 +519,7 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
     }
 
     private fun getSuggestions(
-        composedData: ComposedData, ngramContext: NgramContext,
+        composedData: ComposedData, ngramContext: NgramContext, keyboard: Keyboard,
         settingsValuesForSuggestion: SettingsValuesForSuggestion, sessionId: Int,
         proximityInfoHandle: Long, weightOfLangModelVsSpatialModel: FloatArray, dictGroup: DictionaryGroup
     ): List<SuggestedWordInfo> {
@@ -525,9 +527,15 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
         val weightForLocale = dictGroup.getWeightForLocale(dictionaryGroups, composedData.mIsBatchMode)
         for (dictType in DictionaryFacilitator.ALL_DICTIONARY_TYPES) {
             val dictionary = dictGroup.getDict(dictType) ?: continue
-            val dictionarySuggestions = dictionary.getSuggestions(composedData, ngramContext, proximityInfoHandle,
-                settingsValuesForSuggestion, sessionId, weightForLocale, weightOfLangModelVsSpatialModel
-            ) ?: continue
+            val dictionarySuggestions = if (composedData.mIsBatchMode && !JniUtils.sHaveGestureLib) {
+                // no (closed source) glide typing library: decode the gesture ourselves, based on the main dictionary
+                if (dictType != Dictionary.TYPE_MAIN) continue
+                OpenGestureSuggester.suggest(dictionary, composedData, keyboard,
+                    settingsValuesForSuggestion.mBlockPotentiallyOffensive, weightForLocale)
+            } else {
+                dictionary.getSuggestions(composedData, ngramContext, proximityInfoHandle,
+                    settingsValuesForSuggestion, sessionId, weightForLocale, weightOfLangModelVsSpatialModel)
+            } ?: continue
 
             // For some reason "garbage" words are produced when glide typing. For user history
             // and main dictionaries we can filter them out by checking whether the dictionary

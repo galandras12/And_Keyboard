@@ -39,7 +39,11 @@ public final class JniUtils {
         };
     }
 
+    /** True if the (closed source) glide typing library is loaded. Glide typing itself works without it, see {@link #GESTURE_TYPING_AVAILABLE}. */
     public static boolean sHaveGestureLib = false;
+
+    /** Glide typing is always available: without the library the open source decoder in latin.gesture is used. */
+    public static final boolean GESTURE_TYPING_AVAILABLE = true;
     static {
         // hardcoded default path, may not work on all phones
         @SuppressLint("SdCardPath") String filesDir = "/data/data/" + BuildConfig.APPLICATION_ID + "/files";

@@ -98,6 +98,18 @@ public abstract class Dictionary {
      */
     abstract public boolean isInDictionary(final String word);
 
+    public interface WordConsumer {
+        void accept(String word, int probability, boolean isPossiblyOffensive);
+    }
+
+    /**
+     * Passes every word of this dictionary with its probability (0-255) to the consumer.
+     * Returns false if the dictionary can't be enumerated, or can't be read right now.
+     */
+    public boolean forEachWord(final WordConsumer consumer) {
+        return false;
+    }
+
     /**
      * Get the frequency of the word.
      * @param word the word to get the frequency of.

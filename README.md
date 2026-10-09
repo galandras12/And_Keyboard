@@ -1,7 +1,7 @@
 # And Keyboard
 
 An open source, offline-first Android keyboard (IME), written in Kotlin and Java.
-**Version 0.2, package `com.galandras12.keyboard`, license GPL-3.0-only.**
+**Version 0.3, package `com.galandras12.keyboard`, license GPL-3.0-only.**
 
 And Keyboard is a fork of [HeliBoard](https://github.com/HeliBorg/HeliBoard) (which is based on OpenBoard and the
 Android Open Source Project keyboard). The fork keeps HeliBoard's customizable keyboard, layouts, themes, clipboard,
@@ -34,7 +34,7 @@ suggestions and so on, and adds:
 
 ## Status
 
-Early version (0.2). The layouts, decoder, emoji and dictionary code is covered by unit tests where possible; the decoder tests
+Early version (0.3). The layouts, decoder, emoji and dictionary code is covered by unit tests where possible; the decoder tests
 use simulated finger paths, and the user interface has not been verified on many real devices yet. Bug reports are welcome.
 
 ## Build

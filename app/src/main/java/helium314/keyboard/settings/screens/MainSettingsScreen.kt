@@ -1,6 +1,19 @@
 // SPDX-License-Identifier: GPL-3.0-only
 package helium314.keyboard.settings.screens
 
+import android.content.Context
+import android.content.Intent
+import android.provider.Settings
+import android.view.inputmethod.InputMethodManager
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import helium314.keyboard.latin.utils.UncachedInputMethodManagerUtils
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -66,6 +79,7 @@ fun MainSettingsScreen(
             Column(
                 Modifier.verticalScroll(rememberScrollState()).then(Modifier.padding(innerPadding))
             ) {
+                KeyboardSetupBanner()
                 val missing = getEnabledLocalesWithoutDictionary(LocalContext.current)
                 val resources = LocalResources.current
                 if (missing.isNotEmpty())
@@ -157,6 +171,41 @@ private fun DictionaryMissingBanner(languages: String, onClickDownload: () -> Un
             Button(onClick = onClickDownload, modifier = Modifier.align(Alignment.End)) {
                 Text(stringResource(R.string.dictionary_banner_button))
             }
+        }
+    }
+}
+
+/**
+ * An error looking message at the top while the keyboard is not turned on in the system settings, or is not the keyboard in use.
+ * Tapping it opens the right system screen. Checked again every time the settings are shown.
+ */
+@Composable
+private fun KeyboardSetupBanner() {
+    val ctx = LocalContext.current
+    val imm = ctx.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+    var refresh by remember { mutableIntStateOf(0) }
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event -> if (event == Lifecycle.Event.ON_RESUME) refresh++ }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+    val enabled = remember(refresh) { UncachedInputMethodManagerUtils.isThisImeEnabled(ctx, imm) }
+    val current = remember(refresh) { enabled && UncachedInputMethodManagerUtils.isThisImeCurrent(ctx, imm) }
+    if (enabled && current) return
+    val title = stringResource(if (!enabled) R.string.keyboard_setup_not_enabled_title else R.string.keyboard_setup_not_current_title)
+    val text = stringResource(if (!enabled) R.string.keyboard_setup_not_enabled_text else R.string.keyboard_setup_not_current_text)
+    Card(
+        onClick = {
+            if (!enabled) ctx.startActivity(Intent(Settings.ACTION_INPUT_METHOD_SETTINGS))
+            else imm.showInputMethodPicker()
+        },
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer, contentColor = MaterialTheme.colorScheme.onErrorContainer),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
+    ) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text("⚠ $title", style = MaterialTheme.typography.titleMedium)
+            Text(text, style = MaterialTheme.typography.bodyMedium)
         }
     }
 }

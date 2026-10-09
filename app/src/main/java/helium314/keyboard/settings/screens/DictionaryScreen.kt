@@ -85,6 +85,7 @@ fun DictionaryScreen(
                 default = Defaults.PREF_AUTO_DOWNLOAD_DICTIONARIES,
                 onCheckedChange = { if (it) DictionaryAutoDownloader.requestCheck(ctx, showMessage = true) }
             )
+            InstalledDictionariesList()
         },
         itemContent = { locale ->
             if (locale == null) {

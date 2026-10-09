@@ -26,13 +26,21 @@ object OpenGestureSuggester {
     fun suggest(
         dictionary: Dictionary, composedData: ComposedData, keyboard: Keyboard, blockOffensive: Boolean, weightForLocale: Float
     ): List<SuggestedWordInfo>? {
-        val lexicon = lexiconFor(dictionary, blockOffensive) ?: return null
+        val start = System.nanoTime()
+        val lexicon = try { lexiconFor(dictionary, blockOffensive) } catch (e: Throwable) { GestureDiagnostics.onError(e); throw e }
+        if (lexicon == null) {
+            GestureDiagnostics.onProblem("the word list of the dictionary could not be read")
+            return null
+        }
         val layout = layoutFor(keyboard)
+        if (layout.keys.isEmpty()) GestureDiagnostics.onProblem("the keyboard has no letter keys")
         val pointers = composedData.mInputPointers
         val size = pointers.pointerSize
         val xs = FloatArray(size) { pointers.xCoordinates[it].toFloat() }
         val ys = FloatArray(size) { pointers.yCoordinates[it].toFloat() }
-        return decoder.decode(xs, ys, layout, lexicon, MAX_RESULTS).map {
+        val decoded = try { decoder.decode(xs, ys, layout, lexicon, MAX_RESULTS) } catch (e: Throwable) { GestureDiagnostics.onError(e); throw e }
+        GestureDiagnostics.onDecoded(decoded.size, (System.nanoTime() - start) / 1_000_000)
+        return decoded.map {
             // native scores are large positive numbers, higher is better; keep the order of the decoder cost
             val score = ((2_000_000f - it.cost * 1_000_000f) * weightForLocale).toInt()
             SuggestedWordInfo(it.word, "", score, SuggestedWordInfo.KIND_CORRECTION, dictionary,
@@ -54,7 +62,7 @@ object OpenGestureSuggester {
             entries.sortByDescending { it.second }
             entries.subList(MAX_LEXICON_WORDS, entries.size).clear()
         }
-        return GestureLexicon(entries).also { cached[index] = it }
+        return GestureLexicon(entries).also { cached[index] = it; GestureDiagnostics.onLexicon(it.size) }
     }
 
     /** Reads the word list of the dictionary already, so the first gesture does not have to wait for it. */

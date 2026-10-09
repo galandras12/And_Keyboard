@@ -13,6 +13,9 @@ import java.util.Locale
 
 /** Checks dictionary files and puts them where the keyboard looks for user dictionaries. */
 object DictionaryInstaller {
+    /** Goes up whenever a dictionary was installed, so lists of dictionaries can update themselves. */
+    val installCount = androidx.compose.runtime.mutableIntStateOf(0)
+
     /** @return an error message resource, or the header of the valid dictionary file */
     fun check(file: File): Pair<Int?, DictionaryHeader?> {
         val newHeader = DictionaryInfoUtils.getDictionaryFileHeaderOrNull(file)
@@ -47,6 +50,7 @@ object DictionaryInstaller {
             File(dictFile.parentFile, DictionaryInfoUtils.MAIN_DICT_FILE_NAME).delete()
         }
         context.sendBroadcast(Intent(DictionaryPackConstants.NEW_DICTIONARY_INTENT_ACTION))
+        installCount.intValue++
         return dictFile
     }
 }

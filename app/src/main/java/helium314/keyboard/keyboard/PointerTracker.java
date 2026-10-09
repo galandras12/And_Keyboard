@@ -209,6 +209,11 @@ public final class PointerTracker implements PointerTrackerQueue.Element,
         sGestureEnabler.setMainDictionaryAvailability(mainDictionaryAvailable);
     }
 
+    /** The state of the gesture handling, to show in the settings why gestures do or do not work. */
+    public static GestureEnabler getGestureEnabler() {
+        return sGestureEnabler;
+    }
+
     public static void setGestureHandlingEnabledByUser(final boolean gestureHandlingEnabledByUser) {
         sGestureEnabler.setGestureHandlingEnabledByUser(gestureHandlingEnabledByUser);
     }

@@ -78,6 +78,7 @@ import helium314.keyboard.latin.utils.GestureDataGatheringKt;
 import helium314.keyboard.latin.utils.GestureDataGatheringSettings;
 import helium314.keyboard.latin.utils.InlineAutofillUtils;
 import helium314.keyboard.latin.utils.InputMethodPickerKt;
+import helium314.keyboard.latin.gesture.GestureDiagnostics;
 import helium314.keyboard.latin.utils.DictionaryAutoDownloader;
 import helium314.keyboard.latin.utils.JniUtils;
 import helium314.keyboard.latin.utils.KtxKt;
@@ -1453,6 +1454,7 @@ public class LatinIME extends InputMethodService implements
     }
 
     public void onStartBatchInput() {
+        GestureDiagnostics.INSTANCE.onGestureStarted();
         mInputLogic.onStartBatchInput(mSettings.getCurrent(), mKeyboardSwitcher, mHandler);
         mGestureConsumer.onGestureStarted(mRichImm.getCurrentSubtypeLocale(), mKeyboardSwitcher.getKeyboard());
     }

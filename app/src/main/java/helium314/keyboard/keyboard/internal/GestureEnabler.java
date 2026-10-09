@@ -41,4 +41,9 @@ public final class GestureEnabler {
     public boolean shouldHandleGesture() {
         return mShouldHandleGesture;
     }
+
+    // for the diagnostics in the gesture settings
+    public boolean isMainDictionaryAvailable() { return mMainDictionaryAvailable; }
+    public boolean isEnabledByUser() { return mGestureHandlingEnabledByUser; }
+    public boolean isEnabledByInputField() { return mGestureHandlingEnabledByInputField; }
 }

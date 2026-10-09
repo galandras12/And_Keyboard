@@ -2,6 +2,21 @@
 
 All versions are **pre-releases** (early, not fully tested on real devices). Newest version first.
 
+## 0.3 - 2026-10-10 (pre-release)
+
+### Added
+- **Setup message** at the top of the main settings screen, looking like an error message: shown while And Keyboard is not turned on in
+  the system settings (tapping it opens the keyboard settings) or is not the keyboard in use (tapping it opens the keyboard picker).
+  It is checked again every time the settings are shown.
+- Settings → Dictionaries shows the **list of installed dictionaries** (downloaded or loaded from a file) with name, language, kind
+  and size, and a button to remove each.
+- Glide typing diagnostics in the gesture settings: whether gestures are handled (dictionary loaded, switched on, allowed in the field),
+  how many words the decoder knows, how many gestures were started and decoded, the last result and the last problem. This shows
+  why a gesture does nothing, if it does not work on a device.
+
+### Changed
+- Version 0.3 (versionCode 3).
+
 ## 0.2 - 2026-10-09 (pre-release)
 
 ### Added

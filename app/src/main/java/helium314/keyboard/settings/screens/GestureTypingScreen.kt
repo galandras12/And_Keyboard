@@ -13,7 +13,14 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
+import helium314.keyboard.keyboard.PointerTracker
+import helium314.keyboard.latin.gesture.GestureDiagnostics
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalResources
@@ -135,8 +142,12 @@ fun createGestureTypingSettings(context: Context) = listOf(
 private fun GestureStatusCard() {
     val ctx = LocalContext.current
     val resources = LocalResources.current
-    val missing = remember { getEnabledLocalesWithoutDictionary(ctx) }
+    var refresh by remember { mutableIntStateOf(0) }
+    val missing = remember(refresh) { getEnabledLocalesWithoutDictionary(ctx) }
     val ok = missing.isEmpty()
+    val enabler = PointerTracker.getGestureEnabler()
+    val yes = stringResource(R.string.gesture_status_yes)
+    val no = stringResource(R.string.gesture_status_no)
     Card(
         colors = CardDefaults.cardColors(containerColor = if (ok) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.errorContainer),
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
@@ -144,6 +155,28 @@ private fun GestureStatusCard() {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(stringResource(R.string.gesture_status_title), style = MaterialTheme.typography.titleMedium)
             Text(stringResource(if (JniUtils.sHaveGestureLib) R.string.gesture_status_library else R.string.gesture_status_builtin), style = MaterialTheme.typography.bodyMedium)
+            // live state, read from the keyboard (the settings run in the same process)
+            key(refresh) {
+                Text(
+                    stringResource(R.string.gesture_status_handling,
+                        if (enabler.isMainDictionaryAvailable) yes else no,
+                        if (enabler.isEnabledByUser) yes else no,
+                        if (enabler.isEnabledByInputField) yes else no),
+                    style = MaterialTheme.typography.bodySmall
+                )
+                Text(
+                    stringResource(R.string.gesture_status_decoder_stats,
+                        if (GestureDiagnostics.lexiconWords < 0) "-" else GestureDiagnostics.lexiconWords.toString(),
+                        GestureDiagnostics.gesturesStarted, GestureDiagnostics.gesturesDecoded,
+                        if (GestureDiagnostics.lastCandidates < 0) "-" else GestureDiagnostics.lastCandidates.toString(),
+                        if (GestureDiagnostics.lastMillis < 0) "-" else GestureDiagnostics.lastMillis.toString()),
+                    style = MaterialTheme.typography.bodySmall
+                )
+                GestureDiagnostics.lastError?.let {
+                    Text(stringResource(R.string.gesture_status_error, it), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
+                }
+            }
+            TextButton(onClick = { refresh++ }, modifier = Modifier.align(Alignment.End)) { Text(stringResource(R.string.gesture_status_refresh)) }
             if (ok) {
                 Text(stringResource(R.string.gesture_status_dictionary_ok), style = MaterialTheme.typography.bodyMedium)
             } else {

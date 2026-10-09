@@ -37,7 +37,10 @@ object DictionaryInstaller {
         val dictFile = targetFile(context, locale, header)
         dictFile.parentFile?.mkdirs()
         dictFile.delete()
-        cachedFile.renameTo(dictFile)
+        if (!cachedFile.renameTo(dictFile)) { // e.g. when the cache folder is on another file system
+            cachedFile.copyTo(dictFile, overwrite = true)
+            cachedFile.delete()
+        }
         DictionaryNames.set(context.prefs(), dictFile, name)
         if (header.mIdString.substringBefore(":") == "main") {
             // replaced main dict, remove the one created from internal data

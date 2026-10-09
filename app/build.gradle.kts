@@ -22,6 +22,17 @@ android {
         proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
     }
 
+    signingConfigs {
+        // A fixed, publicly known key for debug builds (pre-releases on GitHub), so that every build is signed the same
+        // way and can update the previous one. It protects nothing: never use it for a real release.
+        getByName("debug") {
+            storeFile = file("debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true

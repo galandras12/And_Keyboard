@@ -138,4 +138,18 @@ class Shark2DecoderTest {
         assertTrue(top1 >= 0.7, "top1 $top1")
         assertTrue(top5 >= 0.9, "top5 $top5")
     }
+
+    @Test fun `a gesture is decoded quickly in a dictionary of 450000 words`() {
+        val random = kotlin.random.Random(11)
+        val big = GestureLexicon(lines("lexicon_qwerty.tsv").map { it.split('\t').let { p -> p[0] to p[1].toInt() } } +
+            (0 until 450_000).map { String(CharArray(random.nextInt(3, 11)) { 'a' + random.nextInt(26) }) to random.nextInt(0, 255) })
+        val layout = layouts.getValue("qwerty")
+        val sample = paths.filter { it.layout == "qwerty" }.take(20)
+        decoder.decode(sample[0].xs, sample[0].ys, layout, big, 5) // warm up
+        val start = System.nanoTime()
+        sample.forEach { decoder.decode(it.xs, it.ys, layout, big, 5) }
+        val millis = (System.nanoTime() - start) / 1_000_000 / sample.size
+        println("decode in ${big.size} words: $millis ms per gesture (on this machine, phones are slower)")
+        assertTrue(millis < 400, "$millis ms per gesture")
+    }
 }

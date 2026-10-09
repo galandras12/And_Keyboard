@@ -257,6 +257,12 @@ class DictionaryFacilitatorImpl : DictionaryFacilitator {
 
                 listener?.onUpdateMainDictionaryAvailability(hasAtLeastOneInitializedMainDictionary())
                 latchForWaitingLoadingMainDictionary.countDown()
+                if (!JniUtils.sHaveGestureLib && Settings.getValues().mGestureInputEnabled) {
+                    // glide typing is decoded from the word list, read it now so the first gesture is not slow
+                    dictGroupsWithNewMainDict.forEach { (dictGroup, _) ->
+                        dictGroup.getDict(Dictionary.TYPE_MAIN)?.let { OpenGestureSuggester.prewarm(it, Settings.getValues().mBlockPotentiallyOffensive) }
+                    }
+                }
             } catch (e: Throwable) {
                 Log.e(TAG, "could not initialize main dictionaries for $locales", e)
             }

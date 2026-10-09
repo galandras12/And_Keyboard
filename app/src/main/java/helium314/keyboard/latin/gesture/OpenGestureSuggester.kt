@@ -51,11 +51,19 @@ object OpenGestureSuggester {
         return GestureLexicon(entries).also { cached[index] = it }
     }
 
+    /** Reads the word list of the dictionary already, so the first gesture does not have to wait for it. */
+    fun prewarm(dictionary: Dictionary, blockOffensive: Boolean) {
+        lexiconFor(dictionary, blockOffensive)
+    }
+
     private fun layoutFor(keyboard: Keyboard): GestureKeyLayout {
         cachedLayout?.let { if (it.first.get() === keyboard) return it.second }
-        val keys = keyboard.sortedKeys.filter { !it.isSpacer && Character.isLetter(it.code) }.map {
-            GestureKey(Character.toChars(it.code)[0], it.x + it.width / 2f, it.y + it.height / 2f, it.width.toFloat(), it.height.toFloat())
-        }
-        return GestureKeyLayout(keys).also { cachedLayout = WeakReference(keyboard) to it }
+        return layoutOf(keyboard).also { cachedLayout = WeakReference(keyboard) to it }
     }
+
+    /** The letter keys of the keyboard, in the coordinates the gesture points are in. */
+    internal fun layoutOf(keyboard: Keyboard): GestureKeyLayout =
+        GestureKeyLayout(keyboard.sortedKeys.filter { !it.isSpacer && Character.isLetter(it.code) }.map {
+            GestureKey(Character.toChars(it.code)[0], it.x + it.width / 2f, it.y + it.height / 2f, it.width.toFloat(), it.height.toFloat())
+        })
 }

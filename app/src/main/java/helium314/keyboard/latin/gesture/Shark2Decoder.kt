@@ -49,27 +49,40 @@ class GestureKeyLayout(keys: Collection<GestureKey>) {
     }
 }
 
-/** Word list with frequencies (0..255, higher is more frequent); words are indexed by first and last letter. */
+/**
+ * Word list with frequencies (0..255, higher is more frequent); words are indexed by first and last letter.
+ * Kept small, as dictionaries can have hundreds of thousands of words: only the word and its frequency are stored.
+ */
 class GestureLexicon(entries: Iterable<Pair<String, Int>>) {
-    class Entry(val word: String, val letters: String, val frequency: Int)
+    class Entry(val word: String, val frequency: Int) {
+        /** the lowercase letters of the word, without apostrophes and hyphens */
+        val letters: String get() = word.lowercase().filter { it.isLetter() }
+    }
 
     private val buckets = HashMap<Int, ArrayList<Entry>>()
     var size = 0
         private set
 
     init {
-        val best = HashMap<String, Entry>()
         for ((word, frequency) in entries) {
-            val letters = word.lowercase().filter { it.isLetter() }
-            if (letters.length < 2 || letters.length > MAX_WORD_LENGTH) continue
-            if (word.any { !it.isLetter() && it != '\'' && it != '-' }) continue
-            val old = best[letters]
-            if (old == null || frequency > old.frequency) best[letters] = Entry(word, letters, frequency)
+            var first = ' '
+            var last = ' '
+            var letterCount = 0
+            var valid = true
+            for (c in word) {
+                if (c.isLetter()) {
+                    if (letterCount == 0) first = c.lowercaseChar()
+                    last = c.lowercaseChar()
+                    letterCount++
+                } else if (c != '\'' && c != '-') {
+                    valid = false
+                    break
+                }
+            }
+            if (!valid || letterCount < 2 || letterCount > MAX_WORD_LENGTH) continue
+            buckets.getOrPut(bucketKey(first, last)) { ArrayList() }.add(Entry(word, frequency))
+            size++
         }
-        for (entry in best.values) {
-            buckets.getOrPut(bucketKey(entry.letters.first(), entry.letters.last())) { ArrayList() }.add(entry)
-        }
-        size = best.size
     }
 
     /** All entries whose first and last letter satisfy the given conditions. */
@@ -148,7 +161,8 @@ class Shark2Decoder(private val config: Config = Config()) {
             results.add(Candidate(c.entry.word, cost, shapeCost, locationCost, c.entry.frequency))
         }
         results.sortBy { it.cost }
-        return results.take(maxResults)
+        val seen = HashSet<String>()
+        return results.filter { seen.add(it.word.lowercase()) }.take(maxResults) // "rend" and "Rend" are one suggestion
     }
 
     private fun keysNear(layout: GestureKeyLayout, x: Float, y: Float): Set<GestureKey> {

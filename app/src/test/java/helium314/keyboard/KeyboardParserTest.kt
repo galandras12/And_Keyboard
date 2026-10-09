@@ -20,6 +20,9 @@ import helium314.keyboard.keyboard.internal.keyboard_parser.LayoutParser
 import helium314.keyboard.keyboard.internal.keyboard_parser.LocaleKeyboardInfos
 import helium314.keyboard.keyboard.internal.keyboard_parser.floris.KeyCode
 import helium314.keyboard.latin.LatinIME
+import helium314.keyboard.latin.gesture.GestureLexicon
+import helium314.keyboard.latin.gesture.OpenGestureSuggester
+import helium314.keyboard.latin.gesture.Shark2Decoder
 import helium314.keyboard.latin.RichInputMethodSubtype
 import helium314.keyboard.latin.utils.LayoutUtilsCustom
 import helium314.keyboard.latin.utils.POPUP_KEYS_LAYOUT
@@ -501,6 +504,28 @@ f""", // no newline at the end
         // the long press of o and u is unchanged
         assertTrue(letterKeys.getValue("o").mPopupKeys!!.any { it.mLabel == "ő" })
         assertTrue(letterKeys.getValue("u").mPopupKeys!!.any { it.mLabel == "ű" })
+    }
+
+    @Test fun `gesture decoder finds words on the keys of a real keyboard`() {
+        // ties the decoder to the keyboard geometry used in the app: key positions must be the ones gestures are reported in
+        for ((locale, layoutName, words) in listOf(
+            Triple(Locale.ENGLISH, "qwerty", listOf("hello", "world", "keyboard")),
+            Triple(Locale.forLanguageTag("hu"), "hungarian_qwertz", listOf("szeretlek", "köszönöm", "hétvége")),
+        )) {
+            val subtype = SubtypeUtilsAdditional.createEmojiCapableAdditionalSubtype(locale, layoutName, true)
+            val (keyboard, _) = buildKeyboard(EditorInfo(), subtype, KeyboardElement.ALPHABET)
+            val layout = OpenGestureSuggester.layoutOf(keyboard)
+            assertTrue(layout.keys.size >= 26, "$layoutName has ${layout.keys.size} letter keys")
+            val lexicon = GestureLexicon(words.map { it to 100 } + listOf("hell" to 100, "wood" to 100, "szeretek" to 100, "kerekes" to 100))
+            for (word in words) {
+                val points = word.mapNotNull { layout.keyFor(it) }.fold(ArrayList<helium314.keyboard.latin.gesture.GestureKey>()) { list, key ->
+                    if (list.lastOrNull() !== key) list.add(key); list
+                }
+                val xs = points.map { it.cx }.toFloatArray()
+                val ys = points.map { it.cy }.toFloatArray()
+                assertEquals(word, Shark2Decoder().decode(xs, ys, layout, lexicon, 1).firstOrNull()?.word, "$layoutName: $word")
+            }
+        }
     }
 
     @Test fun `popup key count does not depend on shift for (for simple layout)`() {

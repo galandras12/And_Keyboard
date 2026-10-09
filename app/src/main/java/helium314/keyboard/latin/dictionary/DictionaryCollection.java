@@ -62,6 +62,17 @@ public final class DictionaryCollection extends Dictionary {
         return suggestions;
     }
 
+    /** Passes the words of all dictionaries of this collection except the emoji dictionary (its "words" are search terms). */
+    @Override
+    public boolean forEachWord(final WordConsumer consumer) {
+        boolean readAny = false;
+        for (final Dictionary dictionary : mDictionaries) {
+            if (Dictionary.TYPE_EMOJI.equals(dictionary.mDictType)) continue;
+            readAny |= dictionary.forEachWord(consumer);
+        }
+        return readAny;
+    }
+
     @Override
     public boolean isInDictionary(final String word) {
         for (int i = mDictionaries.size() - 1; i >= 0; --i)

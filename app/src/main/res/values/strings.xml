@@ -758,6 +758,8 @@ New dictionary:
     <string name="theme_name_darker" tools:keep="@string/theme_name_darker">Darker</string>
     <!-- Theme name for black theme (based on old amoled black) -->
     <string name="theme_name_black" tools:keep="@string/theme_name_black">Black</string>
+    <string name="theme_name_full_white" tools:keep="@string/theme_name_full_white">Full White</string>
+    <string name="theme_name_amoled_black" tools:keep="@string/theme_name_amoled_black">AMOLED Black</string>
     <!-- Theme name for dynamic colors light theme -->
     <string name="theme_name_dynamic" tools:keep="@string/theme_name_dynamic">Dynamic colors</string>
     <!-- Theme name for blue-gray theme -->

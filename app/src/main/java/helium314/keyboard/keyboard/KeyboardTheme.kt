@@ -54,6 +54,8 @@ private constructor(val themeId: Int, @JvmField val mStyleId: Int) {
         const val THEME_DARK = "dark"
         const val THEME_DARKER = "darker"
         const val THEME_BLACK = "black"
+        const val THEME_FULL_WHITE = "full_white"
+        const val THEME_AMOLED_BLACK = "amoled_black"
         const val THEME_DYNAMIC = "dynamic"
         const val THEME_BLUE_GRAY = "blue_gray"
         const val THEME_BROWN = "brown"
@@ -67,6 +69,8 @@ private constructor(val themeId: Int, @JvmField val mStyleId: Int) {
         const val THEME_VIOLETTE = "violette"
         fun getAvailableDefaultColors(prefs: SharedPreferences, isNight: Boolean) = listOfNotNull(
             if (!isNight) THEME_LIGHT else null, THEME_DARK,
+            THEME_FULL_WHITE,
+            THEME_AMOLED_BLACK,
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) THEME_DYNAMIC else null,
             if (prefs.getString(Settings.PREF_THEME_STYLE, Defaults.PREF_THEME_STYLE) == STYLE_HOLO) THEME_HOLO_WHITE else null,
             THEME_DARKER,
@@ -188,6 +192,32 @@ private constructor(val themeId: Int, @JvmField val mStyleId: Int) {
                     "#282828".toColorInt(),
                     Color.WHITE,
                     "#80FFFFFF".toColorInt(),
+                    keyboardBackground = backgroundImage
+                )
+                // white keyboard with black letters
+                THEME_FULL_WHITE -> DefaultColors(
+                    themeStyle,
+                    hasBorders,
+                    Color.rgb(26, 115, 232),
+                    Color.WHITE,
+                    Color.WHITE,
+                    Color.rgb(241, 243, 244),
+                    Color.WHITE,
+                    Color.BLACK,
+                    Color.rgb(95, 99, 104),
+                    keyboardBackground = backgroundImage
+                )
+                // pure black keyboard with white letters, switches the pixels off on AMOLED screens
+                THEME_AMOLED_BLACK -> DefaultColors(
+                    themeStyle,
+                    hasBorders,
+                    Color.rgb(138, 180, 248),
+                    Color.BLACK,
+                    Color.BLACK,
+                    Color.rgb(18, 18, 18),
+                    Color.BLACK,
+                    Color.WHITE,
+                    Color.rgb(176, 176, 176),
                     keyboardBackground = backgroundImage
                 )
                 THEME_DARKER -> DefaultColors(

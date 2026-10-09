@@ -277,6 +277,8 @@
     <string name="theme_name_holo_white" tools:keep="@string/theme_name_holo_white">Holo Fehér</string>
     <string name="theme_name_dark" tools:keep="@string/theme_name_dark">Sötét</string>
     <string name="theme_name_black" tools:keep="@string/theme_name_black">Fekete</string>
+    <string name="theme_name_full_white" tools:keep="@string/theme_name_full_white">Full White</string>
+    <string name="theme_name_amoled_black" tools:keep="@string/theme_name_amoled_black">AMOLED Black</string>
     <string name="theme_name_dynamic" tools:keep="@string/theme_name_dynamic">Dinamikus színek</string>
     <string name="theme_name_blue_gray" tools:keep="@string/theme_name_blue_gray">Kékes szürke</string>
     <string name="theme_name_brown" tools:keep="@string/theme_name_brown">Barna</string>

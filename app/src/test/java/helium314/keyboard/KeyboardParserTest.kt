@@ -492,6 +492,17 @@ f""", // no newline at the end
         }
     }
 
+    @Test fun `hungarian layout puts the double acute letters on the umlaut keys`() {
+        val subtype = SubtypeUtilsAdditional.createEmojiCapableAdditionalSubtype(Locale.forLanguageTag("hu"), "hungarian_qwertz", true)
+        val (_, keys) = buildKeyboard(EditorInfo(), subtype, KeyboardElement.ALPHABET)
+        val letterKeys = keys.flatten().filter { it.mLabel != null }.associateBy { it.mLabel }
+        assertEquals("ő", letterKeys.getValue("ö").mPopupKeys?.first()?.mLabel)
+        assertEquals("ű", letterKeys.getValue("ü").mPopupKeys?.first()?.mLabel)
+        // the long press of o and u is unchanged
+        assertTrue(letterKeys.getValue("o").mPopupKeys!!.any { it.mLabel == "ő" })
+        assertTrue(letterKeys.getValue("u").mPopupKeys!!.any { it.mLabel == "ű" })
+    }
+
     @Test fun `popup key count does not depend on shift for (for simple layout)`() {
         val editorInfo = EditorInfo()
         val subtype = SubtypeUtilsAdditional.createEmojiCapableAdditionalSubtype(Locale.ENGLISH, "qwerty", true)

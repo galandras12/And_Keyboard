@@ -1,10 +1,11 @@
-# Builds the debug APK for a version tag (v0.2, v0.3, ...) and publishes it as a GitHub *pre-release*.
+# Builds the debug APK for a version (a pushed tag v0.2, v0.3, ... or a manual run) and publishes it as a GitHub *pre-release*.
 # The release notes come from CHANGELOG.md: latest version first, then the whole changelog, then the source application.
 name: Pre-release debug APK
 
 on:
   push:
     tags: ['v*']
+  workflow_dispatch: # run by hand for the current versionName; the workflow creates the tag v<versionName> itself
 
 permissions:
   contents: write
@@ -28,25 +29,29 @@ jobs:
           "$SDK/cmdline-tools/latest/bin/sdkmanager" "platforms;android-37.0" "build-tools;37.0.0" "ndk;28.0.13004108" "platform-tools"
           echo "sdk.dir=$SDK" > local.properties
 
-      - name: Check that the tag matches the app version
+      - name: Read the app version
+        id: version
         run: |
-          TAG="${GITHUB_REF_NAME#v}"
           VERSION="$(sed -n 's/.*versionName = "\(.*\)".*/\1/p' app/build.gradle.kts | head -1)"
-          echo "tag $TAG, versionName $VERSION"
-          test "$TAG" = "$VERSION"
+          echo "versionName $VERSION"
+          if [ "$GITHUB_REF_TYPE" = "tag" ] && [ "${GITHUB_REF_NAME#v}" != "$VERSION" ]; then
+            echo "tag $GITHUB_REF_NAME does not match versionName $VERSION"; exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Build the debug APK
         run: ./gradlew assembleDebug --no-daemon
 
       - name: Write the release notes
-        run: python3 tools/release/release_notes.py "${GITHUB_REF_NAME#v}" > release_notes.md
+        run: python3 tools/release/release_notes.py "${{ steps.version.outputs.version }}" > release_notes.md
 
       - name: Publish the pre-release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           APK="$(ls app/build/outputs/apk/debug/AndKeyboard_*-debug.apk)"
-          gh release create "$GITHUB_REF_NAME" "$APK" \
+          gh release create "v${{ steps.version.outputs.version }}" "$APK" \
+            --target "$GITHUB_SHA" \
             --prerelease \
-            --title "And Keyboard ${GITHUB_REF_NAME#v} (pre-release)" \
+            --title "And Keyboard ${{ steps.version.outputs.version }} (pre-release)" \
             --notes-file release_notes.md

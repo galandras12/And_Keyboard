@@ -78,6 +78,7 @@ import helium314.keyboard.latin.utils.GestureDataGatheringKt;
 import helium314.keyboard.latin.utils.GestureDataGatheringSettings;
 import helium314.keyboard.latin.utils.InlineAutofillUtils;
 import helium314.keyboard.latin.utils.InputMethodPickerKt;
+import helium314.keyboard.latin.utils.DictionaryAutoDownloader;
 import helium314.keyboard.latin.utils.JniUtils;
 import helium314.keyboard.latin.utils.KtxKt;
 import helium314.keyboard.latin.utils.LeakGuardHandlerWrapper;
@@ -558,6 +559,7 @@ public class LatinIME extends InputMethodService implements
         super.onCreate();
 
         loadSettings();
+        DictionaryAutoDownloader.INSTANCE.requestCheck(this, false); // downloads missing dictionaries, if the user did not switch this off
         mClipboardHistoryManager.onCreate();
         mHandler.onCreate();
         if (FoldableUtils.INSTANCE.isFoldable())

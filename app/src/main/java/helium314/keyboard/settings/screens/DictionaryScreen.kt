@@ -32,7 +32,11 @@ import helium314.keyboard.latin.common.Links
 import helium314.keyboard.latin.common.LocaleUtils
 import helium314.keyboard.latin.common.LocaleUtils.localizedDisplayName
 import helium314.keyboard.latin.common.splitOnWhitespace
+import helium314.keyboard.latin.settings.Defaults
+import helium314.keyboard.latin.settings.Settings
+import helium314.keyboard.latin.utils.DictionaryAutoDownloader
 import helium314.keyboard.latin.utils.DictionaryInfoUtils
+import helium314.keyboard.settings.preferences.SwitchPreference
 import helium314.keyboard.latin.utils.IntentUtils
 import helium314.keyboard.latin.utils.SubtypeLocaleUtils
 import helium314.keyboard.latin.utils.SubtypeSettings
@@ -72,6 +76,15 @@ fun DictionaryScreen(
                     && loc.localizedDisplayName(ctx.resources).replace("(", "")
                         .splitOnWhitespace().any { it.startsWith(term, true) }
                 }
+        },
+        content = {
+            SwitchPreference(
+                name = stringResource(R.string.auto_download_dictionaries),
+                description = stringResource(R.string.auto_download_dictionaries_summary),
+                key = Settings.PREF_AUTO_DOWNLOAD_DICTIONARIES,
+                default = Defaults.PREF_AUTO_DOWNLOAD_DICTIONARIES,
+                onCheckedChange = { if (it) DictionaryAutoDownloader.requestCheck(ctx, showMessage = true) }
+            )
         },
         itemContent = { locale ->
             if (locale == null) {

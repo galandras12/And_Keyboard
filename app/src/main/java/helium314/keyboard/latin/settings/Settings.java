@@ -205,6 +205,8 @@ public final class Settings implements SharedPreferences.OnSharedPreferenceChang
     public static final String PREF_RECENT_EMOJIS = "recent_emojis";
     public static final String PREF_FREQUENT_EMOJIS = "frequent_emojis";
     public static final String PREF_DICTIONARY_NAMES = "dictionary_names";
+    public static final String PREF_AUTO_DOWNLOAD_DICTIONARIES = "auto_download_dictionaries";
+    public static final String PREF_AUTO_DICTIONARY_ATTEMPTS = "auto_dictionary_attempts";
     public static final String PREF_LAST_SHOWN_EMOJI_CATEGORY_ID = "last_shown_emoji_category_id";
     public static final String PREF_LAST_SHOWN_EMOJI_CATEGORY_PAGE_ID = "last_shown_emoji_category_page_id";
 
@@ -226,7 +228,7 @@ public final class Settings implements SharedPreferences.OnSharedPreferenceChang
     // preferences that are not used in SettingsValues and thus should not trigger reload when changed
     private static boolean reloadOnChanged(String key) {
         return switch (key) {
-            case PREF_LAST_SHOWN_EMOJI_CATEGORY_PAGE_ID, PREF_LAST_SHOWN_EMOJI_CATEGORY_ID, PREF_RECENT_EMOJIS, PREF_FREQUENT_EMOJIS, PREF_DICTIONARY_NAMES,
+            case PREF_LAST_SHOWN_EMOJI_CATEGORY_PAGE_ID, PREF_LAST_SHOWN_EMOJI_CATEGORY_ID, PREF_RECENT_EMOJIS, PREF_FREQUENT_EMOJIS, PREF_DICTIONARY_NAMES, PREF_AUTO_DICTIONARY_ATTEMPTS,
                  PREF_DONT_SHOW_MISSING_DICTIONARY_DIALOG, PREF_SELECTED_SUBTYPE -> false;
             default -> !key.startsWith(PREF_SAVED_APP_SUBTYPE_PREFIX) && !key.startsWith("floating_pos");
         };

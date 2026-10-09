@@ -41,6 +41,7 @@ import helium314.keyboard.latin.utils.DeviceProtectedUtils
 import helium314.keyboard.latin.utils.ExecutorUtils
 import helium314.keyboard.latin.utils.GestureDataGatheringSettings
 import helium314.keyboard.latin.utils.IntentUtils
+import helium314.keyboard.latin.utils.DictionaryAutoDownloader
 import helium314.keyboard.latin.utils.JniUtils
 import helium314.keyboard.latin.utils.Theme
 import helium314.keyboard.latin.utils.UncachedInputMethodManagerUtils
@@ -80,6 +81,7 @@ open class SettingsActivity : ComponentActivity(), SharedPreferences.OnSharedPre
             Settings.getInstance().loadSettings(this, resources.configuration.locale(), inputAttributes)
         }
         ExecutorUtils.getBackgroundExecutor(ExecutorUtils.KEYBOARD).execute { cleanUnusedMainDicts(this) }
+        DictionaryAutoDownloader.requestCheck(this, showMessage = true)
         crashReportFiles.value = findCrashReports(!BuildConfig.DEBUG && !DebugFlags.DEBUG_ENABLED)
         val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
         if (!UncachedInputMethodManagerUtils.isThisImeCurrent(this, imm))

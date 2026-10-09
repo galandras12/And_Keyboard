@@ -103,6 +103,9 @@
     <string name="dictionary_banner_title">Hiányzó szótár</string>
     <string name="dictionary_banner_text">Ehhez nincs szótár: %s. A javaslatokhoz, javításokhoz és a swipe gépeléshez kell egy.</string>
     <string name="dictionary_banner_button">Szótárak letöltése</string>
+    <string name="auto_download_dictionaries">Szótárak automatikus letöltése</string>
+    <string name="auto_download_dictionaries_summary">Letölti minden engedélyezett nyelv főszótárát, amelyiknek még nincs. Csak egyszerű fájlletöltés, semmi nem megy el Önről.</string>
+    <string name="dictionary_auto_downloaded">Szótár letöltve: %s</string>
     <string name="dictionary_name_label">Név</string>
     <string name="dictionary_name_hint">A szótárlistában megjelenő név</string>
     <string name="no_dictionary_download_message">Szótár nélkül csak a korábban beírt szövegekre kap javaslatokat. Most letölthet egyet, vagy a szótárbeállításokban saját fájlt adhat hozzá.</string>

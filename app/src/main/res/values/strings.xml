@@ -700,6 +700,9 @@ New dictionary:
     <string name="dictionary_banner_title">Dictionary missing</string>
     <string name="dictionary_banner_text">There is no dictionary for %s. Suggestions, corrections and glide typing need one.</string>
     <string name="dictionary_banner_button">Download dictionaries</string>
+    <string name="auto_download_dictionaries">Download dictionaries automatically</string>
+    <string name="auto_download_dictionaries_summary">Downloads the main dictionary of each enabled language that has none. Only a plain file download, nothing about you is sent.</string>
+    <string name="dictionary_auto_downloaded">Dictionary downloaded: %s</string>
     <string name="dictionary_name_label">Name</string>
     <string name="dictionary_name_hint">Name shown in the dictionary list</string>
     <string name="no_dictionary_download_message">Without a dictionary, you will only get suggestions for text you entered before. You can download one now, or add your own file in the dictionary settings.</string>

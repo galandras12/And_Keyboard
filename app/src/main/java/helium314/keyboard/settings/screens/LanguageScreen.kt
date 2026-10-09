@@ -36,6 +36,7 @@ import helium314.keyboard.latin.settings.Defaults
 import helium314.keyboard.latin.settings.SettingsSubtype.Companion.toSettingsSubtype
 import helium314.keyboard.latin.utils.DictionaryInfoUtils
 import helium314.keyboard.latin.utils.Log
+import helium314.keyboard.latin.utils.DictionaryAutoDownloader
 import helium314.keyboard.latin.utils.MissingDictionaryDialog
 import helium314.keyboard.latin.utils.SubtypeLocaleUtils
 import helium314.keyboard.latin.utils.SubtypeLocaleUtils.displayName
@@ -117,6 +118,7 @@ private fun SubtypeRow(subtype: InputMethodSubtype, isEnabled: Boolean) {
                     showNoDictDialog = true
                 if (it) SubtypeSettings.addEnabledSubtype(ctx.prefs(), subtype)
                 else SubtypeSettings.removeEnabledSubtype(ctx, subtype)
+                if (it) DictionaryAutoDownloader.requestCheck(ctx, showMessage = true)
             }
         )
         if (showNoDictDialog)

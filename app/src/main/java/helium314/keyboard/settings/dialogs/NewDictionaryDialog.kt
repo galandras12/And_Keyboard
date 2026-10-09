@@ -27,6 +27,7 @@ import helium314.keyboard.latin.common.LocaleUtils.constructLocale
 import helium314.keyboard.latin.common.LocaleUtils.localizedDisplayName
 import helium314.keyboard.latin.makedict.DictionaryHeader
 import helium314.keyboard.latin.utils.DictionaryInfoUtils
+import helium314.keyboard.latin.utils.DictionaryInstaller
 import helium314.keyboard.latin.utils.DictionaryNames
 import helium314.keyboard.latin.utils.prefs
 import helium314.keyboard.latin.utils.ScriptUtils.script
@@ -46,7 +47,7 @@ fun NewDictionaryDialog(
     cachedFile: File,
     mainLocale: Locale?
 ) {
-    val (error, header) = checkDict(cachedFile)
+    val (error, header) = DictionaryInstaller.check(cachedFile)
     if (error != null) {
         InfoDialog(stringResource(error), onDismissRequest)
         cachedFile.delete()
@@ -78,19 +79,7 @@ fun NewDictionaryDialog(
         var name by remember { mutableStateOf(DictionaryNames.get(ctx.prefs(), dictFile) ?: header.description ?: "") }
         ThreeButtonAlertDialog(
             onDismissRequest = { onDismissRequest(); cachedFile.delete() },
-            onConfirmed = {
-                dictFile.parentFile?.mkdirs()
-                dictFile.delete()
-                cachedFile.renameTo(dictFile)
-                DictionaryNames.set(ctx.prefs(), dictFile, name)
-                if (type == Dictionary.TYPE_MAIN) {
-                    // replaced main dict, remove the one created from internal data
-                    val internalMainDictFile = File(cacheDir, DictionaryInfoUtils.MAIN_DICT_FILE_NAME)
-                    internalMainDictFile.delete()
-                }
-                val newDictBroadcast = Intent(DictionaryPackConstants.NEW_DICTIONARY_INTENT_ACTION)
-                ctx.sendBroadcast(newDictBroadcast)
-            },
+            onConfirmed = { DictionaryInstaller.install(ctx, cachedFile, header, locale, name) },
             confirmButtonText = stringResource(if (dictFile.exists()) R.string.replace_dictionary else android.R.string.ok),
             title = { Text(stringResource(R.string.add_new_dictionary_title)) },
             content = {
@@ -134,17 +123,4 @@ fun NewDictionaryDialog(
             scrollContent = true,
         )
     }
-}
-
-private fun checkDict(file: File): Pair<Int?, DictionaryHeader?> {
-    val newHeader = DictionaryInfoUtils.getDictionaryFileHeaderOrNull(file)
-        ?: return R.string.dictionary_file_error to null
-
-    val locale = newHeader.mLocaleString.constructLocale()
-    val dict = ReadOnlyBinaryDictionary(file.absolutePath, 0, file.length(), false, locale, "test")
-    if (!dict.isValidDictionary) {
-        dict.close()
-        return R.string.dictionary_load_error to null
-    }
-    return null to newHeader
 }

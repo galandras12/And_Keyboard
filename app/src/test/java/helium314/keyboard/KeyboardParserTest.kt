@@ -473,6 +473,25 @@ f""", // no newline at the end
         assertEquals(10, keys2[2].size)
     }
 
+    @Test fun `main layouts have expected letter rows`() {
+        val editorInfo = EditorInfo()
+        // (locale, layout) -> letters of the three letter rows
+        val expected = listOf(
+            Triple(Locale.ENGLISH, "qwerty", listOf("qwertyuiop", "asdfghjkl", "zxcvbnm")),
+            Triple(Locale.GERMAN, "qwertz", listOf("qwertzuiop", "asdfghjkl", "yxcvbnm")),
+            Triple(Locale.FRENCH, "azerty", listOf("azertyuiop", "qsdfghjklm", "wxcvbn")),
+            Triple(Locale.forLanguageTag("hu"), "hungarian_qwertz", listOf("qwertzuiopö", "asdfghjklé" + "á", "yxcvbnmü")),
+        )
+        expected.forEach { (locale, layout, rows) ->
+            val subtype = SubtypeUtilsAdditional.createEmojiCapableAdditionalSubtype(locale, layout, true)
+            val (_, keys) = buildKeyboard(editorInfo, subtype, KeyboardElement.ALPHABET)
+            rows.forEachIndexed { i, letters ->
+                val actual = keys[i].mapNotNull { it.mLabel }.filter { it.length == 1 && it[0].isLetter() }.joinToString("")
+                assertEquals(letters, actual, "$layout row $i")
+            }
+        }
+    }
+
     @Test fun `popup key count does not depend on shift for (for simple layout)`() {
         val editorInfo = EditorInfo()
         val subtype = SubtypeUtilsAdditional.createEmojiCapableAdditionalSubtype(Locale.ENGLISH, "qwerty", true)

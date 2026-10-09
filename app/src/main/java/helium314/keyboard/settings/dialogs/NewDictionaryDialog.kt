@@ -3,9 +3,11 @@ package helium314.keyboard.settings.dialogs
 
 import android.content.Intent
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -25,6 +27,8 @@ import helium314.keyboard.latin.common.LocaleUtils.constructLocale
 import helium314.keyboard.latin.common.LocaleUtils.localizedDisplayName
 import helium314.keyboard.latin.makedict.DictionaryHeader
 import helium314.keyboard.latin.utils.DictionaryInfoUtils
+import helium314.keyboard.latin.utils.DictionaryNames
+import helium314.keyboard.latin.utils.prefs
 import helium314.keyboard.latin.utils.ScriptUtils.script
 import helium314.keyboard.latin.utils.SubtypeSettings
 import helium314.keyboard.latin.utils.locale
@@ -71,12 +75,14 @@ fun NewDictionaryDialog(
         val dictFile = File(cacheDir, header.mIdString.substringBefore(":") + "_" + DictionaryInfoUtils.USER_DICTIONARY_SUFFIX)
         val type = header.mIdString.substringBefore(":")
         val info = header.info(LocalConfiguration.current.locale())
+        var name by remember { mutableStateOf(DictionaryNames.get(ctx.prefs(), dictFile) ?: header.description ?: "") }
         ThreeButtonAlertDialog(
             onDismissRequest = { onDismissRequest(); cachedFile.delete() },
             onConfirmed = {
                 dictFile.parentFile?.mkdirs()
                 dictFile.delete()
                 cachedFile.renameTo(dictFile)
+                DictionaryNames.set(ctx.prefs(), dictFile, name)
                 if (type == Dictionary.TYPE_MAIN) {
                     // replaced main dict, remove the one created from internal data
                     val internalMainDictFile = File(cacheDir, DictionaryInfoUtils.MAIN_DICT_FILE_NAME)
@@ -90,6 +96,14 @@ fun NewDictionaryDialog(
             content = {
                 Column {
                     Text(info, Modifier.padding(bottom = 10.dp))
+                    OutlinedTextField(
+                        value = name,
+                        onValueChange = { name = it.take(60) },
+                        label = { Text(stringResource(R.string.dictionary_name_label)) },
+                        supportingText = { Text(stringResource(R.string.dictionary_name_hint)) },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp)
+                    )
                     WithSmallTitle(stringResource(R.string.button_select_language)) {
                         DropDownField(
                             selectedItem = locale,

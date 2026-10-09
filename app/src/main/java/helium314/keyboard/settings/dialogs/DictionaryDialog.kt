@@ -11,11 +11,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -25,13 +25,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.em
 import helium314.keyboard.compat.locale
 import helium314.keyboard.latin.dictionary.Dictionary
 import helium314.keyboard.latin.R
 import helium314.keyboard.latin.common.LocaleUtils.localizedDisplayName
 import helium314.keyboard.latin.utils.DictionaryInfoUtils
-import helium314.keyboard.latin.utils.createDictionaryTextAnnotated
+import helium314.keyboard.latin.utils.DictionaryNames
+import helium314.keyboard.latin.utils.prefs
 import helium314.keyboard.latin.utils.DeleteButton
 import helium314.keyboard.latin.utils.ExpandButton
 import helium314.keyboard.latin.utils.Theme
@@ -51,7 +51,9 @@ fun DictionaryDialog(
     locale: Locale,
 ) {
     val ctx = LocalContext.current
-    val (dictionaries, hasInternal) = getUserAndInternalDictionaries(ctx, locale)
+    var refresh by remember { mutableIntStateOf(0) } // changes when a dictionary was added
+    var downloaded by remember { mutableStateOf<File?>(null) }
+    val (dictionaries, hasInternal) = remember(refresh) { getUserAndInternalDictionaries(ctx, locale) }
     val mainDict = dictionaries.firstOrNull { it.name == Dictionary.TYPE_MAIN + "_" + DictionaryInfoUtils.USER_DICTIONARY_SUFFIX }
     val addonDicts = dictionaries.filterNot { it == mainDict }
     val picker = dictionaryFilePicker(locale)
@@ -85,15 +87,12 @@ fun DictionaryDialog(
                     )
                     addonDicts.forEach { DictionaryDetails(it) }
                 }
-                val dictString = createDictionaryTextAnnotated(locale)
-                if (dictString.isNotEmpty()) {
-                    HorizontalDivider()
-                    Text(stringResource(R.string.dictionary_available),
-                        modifier = Modifier.padding(top = 12.dp, bottom = 4.dp),
-                        style = MaterialTheme.typography.titleSmall
-                    )
-                    Text(dictString, style = LocalTextStyle.current.merge(lineHeight = 1.8.em))
-                }
+                HorizontalDivider()
+                Text(stringResource(R.string.dictionary_download_title),
+                    modifier = Modifier.padding(top = 12.dp, bottom = 8.dp),
+                    style = MaterialTheme.typography.titleSmall
+                )
+                DictionaryDownloadList(locale) { downloaded = it }
             }
         },
         scrollContent = true,
@@ -104,6 +103,9 @@ fun DictionaryDialog(
             picker.launch(intent)
         }
     )
+    downloaded?.let {
+        NewDictionaryDialog(onDismissRequest = { downloaded = null; refresh++ }, it, locale)
+    }
 }
 
 @Composable
@@ -112,7 +114,9 @@ private fun DictionaryDetails(dict: File) {
     val type = header.mIdString.substringBefore(":")
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showDetails by remember { mutableStateOf(false) }
-    val title = if (type != DictionaryInfoUtils.DEFAULT_MAIN_DICT) type
+    val prefs = LocalContext.current.prefs()
+    val customName = DictionaryNames.get(prefs, dict)
+    val title = customName ?: if (type != DictionaryInfoUtils.DEFAULT_MAIN_DICT) type
         else stringResource(R.string.main_dictionary)
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -137,6 +141,7 @@ private fun DictionaryDetails(dict: File) {
             onDismissRequest = { showDeleteDialog = false },
             confirmButtonText = stringResource(R.string.remove),
             onConfirmed = {
+                DictionaryNames.remove(context.prefs(), dict)
                 dict.delete()
                 context.sendBroadcast(Intent(DictionaryPackConstants.NEW_DICTIONARY_INTENT_ACTION))
             },

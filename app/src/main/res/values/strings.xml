@@ -678,6 +678,31 @@ New dictionary:
     <string name="dictionary_load_error">"Error loading dictionary file"</string>
     <!-- Message about some dictionary indicating it can be downloaded, but hasn't been yet -->
     <string name="dictionary_available">Dictionary available</string>
+    <!-- Dictionary download -->
+    <string name="dictionary_download_title">Download dictionaries</string>
+    <string name="dictionary_download_button">Download</string>
+    <string name="dictionary_download_cancel">Cancel</string>
+    <string name="dictionary_download_none">No dictionary available for this language. You can add your own dictionary file.</string>
+    <string name="dictionary_download_privacy">The download is a plain request for the file, nothing about you or your typing is sent.</string>
+    <string name="dictionary_download_type_main">Main dictionary</string>
+    <string name="dictionary_download_type_emoji">Emoji search</string>
+    <string name="dictionary_download_source_this_project">Source: this project (Hunspell and word frequencies, CC-BY-SA-4.0)</string>
+    <string name="dictionary_download_source_this_project_emoji">Source: this project (Unicode CLDR)</string>
+    <string name="dictionary_download_source_aosp">Source: aosp-dictionaries repository</string>
+    <string name="dictionary_download_source_aosp_experimental">Source: aosp-dictionaries repository (experimental)</string>
+    <string name="dictionary_download_source_aosp_cldr">Source: aosp-dictionaries repository (CLDR and Signal data)</string>
+    <string name="dictionary_download_failed">Download failed: %s</string>
+    <string name="dictionary_download_error_insecure">the address is not https</string>
+    <string name="dictionary_download_error_network">no connection or interrupted</string>
+    <string name="dictionary_download_error_status">server answered with error %s</string>
+    <string name="dictionary_download_error_too_large">file is too large</string>
+    <string name="dictionary_download_error_checksum">file does not match the expected checksum</string>
+    <string name="dictionary_banner_title">Dictionary missing</string>
+    <string name="dictionary_banner_text">There is no dictionary for %s. Suggestions, corrections and glide typing need one.</string>
+    <string name="dictionary_banner_button">Download dictionaries</string>
+    <string name="dictionary_name_label">Name</string>
+    <string name="dictionary_name_hint">Name shown in the dictionary list</string>
+    <string name="no_dictionary_download_message">Without a dictionary, you will only get suggestions for text you entered before. You can download one now, or add your own file in the dictionary settings.</string>
     <!-- Hint to tell when the data was last updated. Usage : "Last updated [date]", may contain a : or so. -->
     <!-- Action to delete (a file) -->
     <string name="delete">Delete</string>

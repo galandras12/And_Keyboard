@@ -1,7 +1,19 @@
 // SPDX-License-Identifier: GPL-3.0-only
 package helium314.keyboard.settings.screens
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.unit.dp
+import helium314.keyboard.latin.common.LocaleUtils.localizedDisplayName
+import helium314.keyboard.latin.utils.getEnabledLocalesWithoutDictionary
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.only
@@ -54,6 +66,10 @@ fun MainSettingsScreen(
             Column(
                 Modifier.verticalScroll(rememberScrollState()).then(Modifier.padding(innerPadding))
             ) {
+                val missing = getEnabledLocalesWithoutDictionary(LocalContext.current)
+                val resources = LocalResources.current
+                if (missing.isNotEmpty())
+                    DictionaryMissingBanner(missing.joinToString(", ") { it.localizedDisplayName(resources) }, onClickDictionaries)
                 Preference(
                     name = stringResource(R.string.language_and_layouts_title),
                     description = enabledSubtypes.joinToString(", ") { it.displayName() },
@@ -125,6 +141,22 @@ private fun PreviewScreen() {
     Theme(previewDark) {
         Surface {
             MainSettingsScreen({}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {})
+        }
+    }
+}
+
+@Composable
+private fun DictionaryMissingBanner(languages: String, onClickDownload: () -> Unit) {
+    Card(
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
+    ) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(stringResource(R.string.dictionary_banner_title), style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.dictionary_banner_text, languages), style = MaterialTheme.typography.bodyMedium)
+            Button(onClick = onClickDownload, modifier = Modifier.align(Alignment.End)) {
+                Text(stringResource(R.string.dictionary_banner_button))
+            }
         }
     }
 }

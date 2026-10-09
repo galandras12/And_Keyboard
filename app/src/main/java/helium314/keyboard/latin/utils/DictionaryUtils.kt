@@ -3,7 +3,19 @@
 package helium314.keyboard.latin.utils
 
 import android.content.Context
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import helium314.keyboard.settings.dialogs.DictionaryDownloadList
+import helium314.keyboard.settings.dialogs.NewDictionaryDialog
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -19,6 +31,15 @@ import helium314.keyboard.latin.settings.Settings
 import helium314.keyboard.settings.dialogs.ConfirmationDialog
 import java.io.File
 import java.util.Locale
+
+/** Locales of the enabled languages for which no dictionary is installed. */
+fun getEnabledLocalesWithoutDictionary(context: Context): List<Locale> =
+    SubtypeSettings.getEnabledSubtypes(true).map { it.locale() }
+        .filter { it.language != SubtypeLocaleUtils.NO_LANGUAGE }.distinct()
+        .filter { locale ->
+            val (userDicts, hasInternal) = helium314.keyboard.settings.screens.getUserAndInternalDictionaries(context, locale)
+            !hasInternal && userDicts.none { it.name.startsWith(DictionaryInfoUtils.MAIN_DICT_PREFIX) }
+        }
 
 fun getDictionaryLocales(context: Context): MutableSet<Locale> {
     val locales = HashSet<Locale>()
@@ -46,22 +67,20 @@ fun MissingDictionaryDialog(onDismissRequest: () -> Unit, locale: Locale) {
         onDismissRequest()
         return
     }
-    val availableDicts = createDictionaryTextAnnotated(locale)
-    val repositoryLink = stringResource(R.string.dictionary_link_text).withHtmlLink(Links.DICTIONARY_URL)
-    val dictUrl = "${Links.DICTIONARY_URL}${Links.DICTIONARY_DOWNLOAD_SUFFIX}dictionaries/main_$locale.dict"
-    val dictionaryLink = stringResource(R.string.dictionary_link_text).withHtmlLink(dictUrl)
-    val message = stringResource(R.string.no_dictionary_message, repositoryLink, locale.toString(), dictionaryLink)
-    var annotatedString = message.htmlToAnnotated()
-    if (availableDicts.isNotEmpty())
-        annotatedString += AnnotatedString("\n") + availableDicts
-
+    var downloaded by remember { mutableStateOf<File?>(null) }
     ConfirmationDialog(
         onDismissRequest = onDismissRequest,
         cancelButtonText = stringResource(R.string.dialog_close),
         onConfirmed = { prefs.edit { putBoolean(Settings.PREF_DONT_SHOW_MISSING_DICTIONARY_DIALOG, true) } },
         confirmButtonText = stringResource(R.string.no_dictionary_dont_show_again_button),
-        content = { Text(annotatedString) }
+        content = {
+            Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(stringResource(R.string.no_dictionary_download_message))
+                DictionaryDownloadList(locale) { downloaded = it }
+            }
+        }
     )
+    downloaded?.let { NewDictionaryDialog(onDismissRequest = { downloaded = null; onDismissRequest() }, it, locale) }
 }
 
 /** if dictionaries for [locale] or language are available returns links to them */

@@ -8,6 +8,8 @@ SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Only used to download dictionary files the user picks in the dictionary settings, see DictionaryDownloader -->
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_USER_DICTIONARY" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.VIBRATE" />
@@ -15,6 +17,7 @@ SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
     <uses-permission android:name="android.permission.READ_CONTACTS" />
 
     <application android:label="@string/english_ime_name"
+            android:usesCleartextTraffic="false"
             android:name="helium314.keyboard.latin.App"
             android:icon="@mipmap/ic_launcher"
             android:roundIcon="@mipmap/ic_launcher_round"

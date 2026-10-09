@@ -2,7 +2,7 @@
 
 This project is a fork of [HeliBoard](https://github.com/Helium314/HeliBoard)
 (upstream commit `bc2b911`, version `4.2-beta1`), licensed under GPL-3.0
-(see `LICENSE`). Phase 1 only sets up the build; no source files are modified.
+(see `LICENSE`).
 
 ## Requirements
 
@@ -83,20 +83,29 @@ app/
       event/, accessibility/,
       compat/, dictionarypack/      Event handling, accessibility, API compat, dictionary pack
     jni/                            Native C++ dictionary / proximity code (built via ndkBuild)
-    res/, assets/                   Resources, translations, keyboard layouts, dictionaries
+    res/, assets/                   Resources, translations, keyboard layouts (no dictionaries, see below)
   src/debug, src/debugNoMinify      Variant-specific resources and overrides
   src/test                          Unit tests
-tools/                              Helper scripts (emoji keys, diacritics, release)
+tools/                              Helper scripts (emoji keys, diacritics, release, hu-dictionary, emoji-dictionary, gesture)
+dictionaries/                       Dictionaries hosted for the in-app download (not part of the APK)
 fastlane/, art/                     Store metadata and artwork
 layouts.md                          Documentation of the custom layout format
 ```
 
 ## Permissions (privacy baseline)
 
-The built APK declares: `READ_USER_DICTIONARY`, `WRITE_USER_DICTIONARY`, `READ_CONTACTS`,
-`VIBRATE`, `RECEIVE_BOOT_COMPLETED` (inherited from HeliBoard). Project rules:
-**no `INTERNET` permission** and **no keystroke logging**. `READ_CONTACTS` (used for
-contact-name suggestions) is upstream behavior; whether to keep it is a phase 2 decision.
+The built APK declares: `INTERNET`, `READ_USER_DICTIONARY`, `WRITE_USER_DICTIONARY`, `READ_CONTACTS`,
+`VIBRATE`, `RECEIVE_BOOT_COMPLETED` (all but `INTERNET` inherited from HeliBoard). Project rules:
+**no keystroke logging**, and **`INTERNET` is only for downloading dictionary files**.
+
+- `INTERNET` is used by exactly one class, `latin/utils/DictionaryDownloader.kt`: a plain https GET of a dictionary
+  file that the user picked in Settings → Dictionaries (or from the "dictionary missing" notice). Nothing is
+  sent about the user, the device or the typed text; cleartext http is disabled in the manifest and refused by the
+  downloader (also for redirects), the size is limited to 80 MB, and files hosted by this project are checked
+  against a SHA-256 (see `DictionaryCatalog.kt`).
+- No dictionaries are bundled in the APK. They are downloaded on request, or loaded from a file with a name
+  chosen by the user. Hosted dictionaries and their licenses: `dictionaries/README.md`.
+- `READ_CONTACTS` (used for contact-name suggestions) is upstream behavior; whether to keep it is still open.
 
 ## Upstream
 
